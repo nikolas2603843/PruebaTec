@@ -51,7 +51,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             });
     }
     cargarDatos(album) {
-        debugger
+        
         this.formUpdateAlbum.get('nombre').setValue(album.name)
         this.formUpdateAlbum.get('fecha').setValue(new Date(album.releaseDate))
         this.formUpdateAlbum.get('genero').setValue(this.generos.find(element => element.name == album.genre))
@@ -88,7 +88,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     updateAlbum() {
-        debugger
+        
         if (this.formUpdateAlbum.valid) {
             const {
                 nombre,
