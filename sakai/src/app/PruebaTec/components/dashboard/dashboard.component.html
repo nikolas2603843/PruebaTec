@@ -1,0 +1,204 @@
+<div class="grid p-fluid">
+    <div class="col-12">
+        <div class="card">
+            <div class="grid">
+                <div class="col-12 md:col-6">
+                    <p-button label="Crear album" (click)="isNewAlbum = !isNewAlbum" />
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <h5>Albums</h5>
+
+            <p-carousel [value]="albums" [numVisible]="3" [numScroll]="3" [circular]="true"
+                [responsiveOptions]="responsiveOptions" autoplayInterval="7000">
+                <ng-template let-album pTemplate="item">
+                    <div class="border-1 surface-border border-round m-2 p-3">
+                        <div class="mb-3">
+                            <div class="relative mx-auto">
+                                <img src="{{album.cover}}" [alt]="album.name" class="w-full border-round" />
+                                <p-tag [value]="album.recordLabel" [severity]="getSeverity(album.recordLabel)"
+                                    class="absolute" [ngStyle]="{ 'left.px': 5, 'top.px': 5 }" />
+                            </div>
+                        </div>
+                        <div class="mt-0 font-semibold text-xl">
+                            {{ album.name }}
+                        </div>
+                        <div class="mb-3 font-medium">
+                            {{ album.description }}
+                        </div>
+                        <div class="flex justify-content-between align-items-center">
+                            <div class="mb-3 font-light">
+                                {{ album.releaseDate | date: 'yyyy/MM/dd' }}
+                            </div>
+                            <div class="mb-3 font-semibold">
+                                genero: {{ album.genre }}
+                            </div>
+                        </div>
+
+                        <span>
+
+                            <p-button icon="pi pi-comments" severity="secondary" [outlined]="true"
+                                (click)="isNewComment = !isNewComment && comentariosSeleccionados = album.comments && albumSeleccionado = album" />
+                            <p-button icon="pi pi-eye" styleClass="ml-2" (click)="cargarDatos(album)" />
+                        </span>
+                    </div>
+                </ng-template>
+            </p-carousel>
+        </div>
+    </div>
+
+</div>
+
+<p-dialog header="Crear un nuevo album" [modal]="true" [(visible)]="isNewAlbum" [style]="{ width: '50rem' }"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+    <form class="grid" [formGroup]="formNewAlbum">
+
+        <div class="col-12 md:col-6">
+            <header>Nombre del album</header>
+            <input type="text" formControlName="nombre" pInputText placeholder="Escribe">
+        </div>
+        <div class="col-12 md:col-6">
+            <header> fecha de lanzamiento</header>
+            <p-calendar formControlName="fecha" appendTo="body" />
+        </div>
+        <div class="col-12 md:col-6">
+            <header>Género</header>
+            <p-dropdown formControlName="genero" [options]="generos" optionLabel="name" placeholder="Seleccione" />
+        </div>
+        <div class="col-12 md:col-6">
+            <header>Disquera</header>
+            <p-dropdown formControlName="disquera" [options]="disqueras" optionLabel="name" placeholder="Seleccione" />
+        </div>
+
+        <div class="col-12 md:col-6">
+            <header>Descripción</header>
+            <textarea formControlName="descripcion" rows="5" cols="30" pInputTextarea>
+        </textarea>
+        </div>
+        <div class="col-12 md:col-6">
+            <header>Cubierta</header>
+            <textarea formControlName="cubierta" rows="5" cols="30" pInputTextarea>
+        </textarea>
+        </div>
+    </form>
+    <div class="flex justify-content-end gap-2">
+        <p-button label="Cancelar" severity="secondary" (onClick)="isNewAlbum = false" />
+        <p-button label="Crear" (onClick)="registerAlbum()" />
+    </div>
+</p-dialog>
+
+<p-dialog header="Agrega tu comentario" [modal]="true" [(visible)]="isNewComment" [style]="{ width: '50rem' }"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+    <form class="grid" [formGroup]="formNewCommet">
+        <div class="col-12 md:col-6">
+            <header>calificacion</header>
+            <p-rating formControlName="rating" [cancel]="false" />
+        </div>
+        <div class="col-12 md:col-6">
+            <header>Comentario</header>
+            <textarea formControlName="description" rows="5" cols="30" pInputTextarea>
+        </textarea>
+        </div>
+        <div class="col-12">
+            <p-table [value]="comentariosSeleccionados?.comments" [tableStyle]="{ 'min-width': '50rem' }">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Calificación</th>
+                        <th>Comentario</th>
+
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-product>
+                    <tr>
+                        <td>{{ product.rating }}</td>
+                        <td>{{ product.description }}</td>
+
+                    </tr>
+                </ng-template>
+            </p-table>
+
+        </div>
+        <div class="flex justify-content-end gap-2">
+            <p-button label="Cancelar" severity="secondary" (onClick)="isNewComment = false" />
+            <p-button label="Comentar" (onClick)="registerComment()" />
+        </div>
+    </form>
+</p-dialog>
+
+<p-dialog header="Gestiona tu album" [modal]="true" [(visible)]="isViewAlbum" [style]="{ width: '50rem' }"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+
+    <form class="grid" [formGroup]="formUpdateAlbum">
+        <div class="col-12">
+            <h5>Listado de canciones del album</h5>
+        </div>
+        <div class="col-12">
+            <p-table [value]="cancionesAlbumSeleccionado" [tableStyle]="{ 'min-width': '50rem' }">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Duración</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-product>
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.duration }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <div class="col-12">
+            <h5>Actualizar album</h5>
+        </div>
+
+        <div class="col-12 md:col-6">
+            <header>Nombre del album</header>
+            <input type="text" formControlName="nombre" pInputText placeholder="Escribe">
+        </div>
+        <div class="col-12 md:col-6">
+            <header> fecha de lanzamiento</header>
+            <p-calendar formControlName="fecha" appendTo="body" />
+        </div>
+        <div class="col-12 md:col-6">
+            <header>Género</header>
+            <p-dropdown formControlName="genero" [options]="generos" optionLabel="name" placeholder="Seleccione" />
+        </div>
+        <div class="col-12 md:col-6">
+            <header>Disquera</header>
+            <p-dropdown formControlName="disquera" [options]="disqueras" optionLabel="name" placeholder="Seleccione" />
+        </div>
+
+        <div class="col-12 md:col-6">
+            <header>Descripción</header>
+            <textarea formControlName="descripcion" rows="5" cols="30" pInputTextarea>
+        </textarea>
+        </div>
+        <div class="col-12 md:col-6">
+            <header>Cubierta</header>
+            <textarea formControlName="cubierta" rows="5" cols="30" pInputTextarea>
+        </textarea>
+        </div>
+        <div class="flex justify-content-end gap-2">
+            <p-button label="Eliminar Album" severity="secondary" (onClick)="deleteAlbum()" />
+            <p-button label="Actualizar" (onClick)="updateAlbum()" />
+        </div>
+    </form>
+
+
+
+</p-dialog>
+
+
+
+
+
+
+<p-toast />
